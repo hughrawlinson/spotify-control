@@ -69,7 +69,6 @@ const ensureAuthorized = (f, configPath) => {
 const retryWithRefreshIfUnauthorized = (request, configPath) => {
   withConfig(configPath, (config) => {
     request(config).then((response) => {
-      console.log(response.status);
       if (response.status === 401) {
         commands.refresh(config).then(response => {
           saveConfig(configPath, response);
@@ -78,7 +77,7 @@ const retryWithRefreshIfUnauthorized = (request, configPath) => {
           });
         });
       }
-    });
+    }).catch(console.log);
   })();
 }
 
@@ -113,7 +112,6 @@ program
   .command('play')
   .option('-e, --entity <spotify_uri>', `Pass an optional Spotify URI to play a context`)
   .action(cmd => ensureAuthorized(() => {
-    console.log(cmd);
     retryWithRefreshIfUnauthorized((config) => commands.play(config, cmd.entity));
   }));
 

@@ -62,7 +62,6 @@ function refresh(config) {
         grant_type: 'refresh_token'
       })
     }).then(j => {
-      console.log(j);
       return j.json();
     }).then(resp => {
       resolve(resp);
@@ -81,32 +80,33 @@ function spotifyRequest(path, config, method, body) {
 }
 
 function next(config) {
-  return spotifyRequest('/me/player/next', config).then(j=>j.json()).catch(console.log);
+  return spotifyRequest('/me/player/next', config).catch(console.log);
 }
 
 function previous(config) {
-  return spotifyRequest('/me/player/previous', config).then(j=>j.json()).catch(console.log);
+  return spotifyRequest('/me/player/previous', config).catch(console.log);
 }
 
 function player(config) {
-  return spotifyRequest('/me/player', config, "GET").then(j=>j.json()).catch(console.log);
+  return spotifyRequest('/me/player', config, "GET").catch(console.log);
 }
 
 function play(config, uri) {
   return spotifyRequest('/me/player/play', config, "PUT", uri && JSON.stringify({
     uris: [uri]
-  })).then(j=>j.json()).catch(console.log);
+  })).catch(console.log);
 }
 
 function pause(config) {
-  return spotifyRequest('/me/player/pause', config, "PUT").then(j=>j.json()).catch(console.log);
+  return spotifyRequest('/me/player/pause', config, "PUT").catch(console.log);
 }
 
 function toggle(config) {
-  return player(config).then(response => {
+  return player(config).then(j => j.json()).then(response => {
     response.is_playing
       ? pause(config)
-      : play(config)
+      : play(config);
+    return response;
   });
 }
 
