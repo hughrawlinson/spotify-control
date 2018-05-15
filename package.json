@@ -1,14 +1,14 @@
 {
-  "name": "spotify-control",
+  "name": "@hughrawlinson/spotify-control",
   "version": "1.0.0",
-  "description": "",
+  "description": "A CLI for Spotify Connect",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["spotify", "cli", "connect"],
+  "author": "Hugh Rawlinson <hughr2005@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "commander": "^2.15.1",
     "node-fetch": "^2.1.2",
