@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 const program = require('commander');
 const package = require('./package.json');
 const untildify = require('untildify');
@@ -65,20 +66,61 @@ const ensureAuthorized = (f, configPath) => {
   })();
 }
 
+const retryWithRefreshIfUnauthorized = (request, configPath) => {
+  withConfig(configPath, (config) => {
+    request(config).then((response) => {
+      console.log(response.status);
+      if (response.status === 401) {
+        commands.refresh(config).then(response => {
+          saveConfig(configPath, response);
+          withConfig(configPath, (updatedConfig) => {
+            request(config);
+          });
+        });
+      }
+    });
+  })();
+}
+
 program
   .version(package.version)
-  .option('-c, --config <path>', `set config path. defaults to ${DEFAULT_CONFIG}`)
+  .option('-c, --config <path>', `Set config path. Defaults to ${DEFAULT_CONFIG}`)
 
 program
   .command('login')
+  .option('--show-dialog', 'Show Spotify Auth Dialog. Defaults to False')
   .action(cmd => login(cmd.parent.config));
 
 program
   .command('next')
   .action(cmd => ensureAuthorized(() => {
-    withConfig(cmd.parent.config, (config) => {
-      commands.next(config);
-    })();
+    retryWithRefreshIfUnauthorized(commands.next);
+  }));
+
+program
+  .command('previous')
+  .action(cmd => ensureAuthorized(() => {
+    retryWithRefreshIfUnauthorized(commands.previous);
+  }));
+
+program
+  .command('toggle')
+  .action(cmd => ensureAuthorized(() => {
+    retryWithRefreshIfUnauthorized(commands.toggle);
+  }));
+
+program
+  .command('play')
+  .option('-e, --entity <spotify_uri>', `Pass an optional Spotify URI to play a context`)
+  .action(cmd => ensureAuthorized(() => {
+    console.log(cmd);
+    retryWithRefreshIfUnauthorized((config) => commands.play(config, cmd.entity));
+  }));
+
+program
+  .command('pause')
+  .action(cmd => ensureAuthorized(() => {
+    retryWithRefreshIfUnauthorized(commands.pause);
   }));
 
 program

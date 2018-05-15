@@ -10,17 +10,23 @@ From there, you run `spotify-control login`, which will log you in and auth you 
 ## Usage
 
 ```
-  Usage: cli [options] [command]
+  Usage: spotify-control [options] [command]
 
   Options:
 
     -V, --version        output the version number
-    -c, --config <path>  set config path. defaults to ~/.config/spotify-control.json
+    -c, --config <path>  Set config path. Defaults to ~/.config/spotify-control.json
     -h, --help           output usage information
 
   Commands:
 
-    login
+    login [options]
     next
+    previous
+    toggle
+    play [options]
+    pause
     printconfig
 ```
+
+`spotify-control` works well with [skhd](https://github.com/koekeishiya/skhd), the simple hotkey daemon for macOS. In fact, that's why I built it - so that I could use the media keys on my mac to control Spotify playing in the browser, or on my speakers. You can find an example configuration in `example.skhdrc`.

@@ -46,20 +46,76 @@ function login(config) {
   });
 }
 
-function spotifyRequest(path, config) {
+function refresh(config) {
+  return new Promise((resolve, reject) => {
+    const client_creds = Buffer.from(
+      `${config.client_id}:${config.client_secret}`
+    ).toString('base64');
+    fetch(`${SPOTIFY_AUTH_URL}/api/token`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "authorization": `Basic ${client_creds}`
+      },
+      body: qs.stringify({
+        refresh_token: config.refresh_token,
+        grant_type: 'refresh_token'
+      })
+    }).then(j => {
+      console.log(j);
+      return j.json();
+    }).then(resp => {
+      resolve(resp);
+    }).catch(console.log)
+  });
+}
+
+function spotifyRequest(path, config, method, body) {
   return fetch(`${SPOTIFY_API_URL}${path}`, {
-    method: "POST",
+    method: method || "POST",
     headers: {
       "authorization": `Bearer ${config.access_token}`
-    }
+    },
+    body
   });
 }
 
 function next(config) {
-  spotifyRequest('/me/player/next', config).then(console.log).catch(console.log);
+  return spotifyRequest('/me/player/next', config).then(j=>j.json()).catch(console.log);
+}
+
+function previous(config) {
+  return spotifyRequest('/me/player/previous', config).then(j=>j.json()).catch(console.log);
+}
+
+function player(config) {
+  return spotifyRequest('/me/player', config, "GET").then(j=>j.json()).catch(console.log);
+}
+
+function play(config, uri) {
+  return spotifyRequest('/me/player/play', config, "PUT", uri && JSON.stringify({
+    uris: [uri]
+  })).then(j=>j.json()).catch(console.log);
+}
+
+function pause(config) {
+  return spotifyRequest('/me/player/pause', config, "PUT").then(j=>j.json()).catch(console.log);
+}
+
+function toggle(config) {
+  return player(config).then(response => {
+    response.is_playing
+      ? pause(config)
+      : play(config)
+  });
 }
 
 module.exports = {
   login,
-  next
+  refresh,
+  next,
+  previous,
+  toggle,
+  pause,
+  play
 }

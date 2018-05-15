@@ -1,0 +1,3 @@
+play : spotify-control toggle
+fast : spotify-control next
+rewind : spotify-control previous
